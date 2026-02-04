@@ -5,12 +5,11 @@ from datetime import datetime
 
 st.set_page_config(page_title="Landlocked Property Filter", page_icon="🏞️", layout="wide")
 
-# Version 1.2 - Fixed SECTION column preservation in proximity filtering
-# Deploy timestamp: 2026-02-04 - FORCE REDEPLOY
+# Version 1.3 - Fixed SECTION column being wiped by title case function
 
 st.title("🏞️ Landlocked Property Filter")
 st.markdown("Filter landlocked properties and prepare for mailing list output")
-st.caption("Version 1.2 - SECTION fix deployed")
+st.caption("Version 1.3")
 
 # Define columns to delete (from close-input-file spec)
 COLUMNS_TO_DELETE = [
@@ -85,14 +84,21 @@ def haversine_distance_feet(lat1, lon1, lat2, lon2):
 
 
 def apply_title_case(df):
-    """Apply title case to all text columns except state columns"""
+    """Apply title case to all text columns except state columns and numeric-like columns"""
     state_columns = ['PROP_STATE', 'SITE_STATE', 'OWNER_STATE', 'address_1_state', 'custom.State']
+
+    # Columns that contain numeric data but may be typed as object after concat
+    numeric_columns = ['SECTION', 'TOWNSHIP', 'RANGE', 'CENSUS_TRACT', 'LATITUDE', 'LONGITUDE',
+                       'ACREAGE', 'AGGR_ACREAGE', 'BUILDING_SQFT', 'LAND_SQFT', 'YR_BLT',
+                       'VAL_TRANSFER', 'VAL_MARKET', 'APPRAISE_VAL', 'LAST_LOAN_VALUE',
+                       'AGGR_LOT_COUNT', 'UNITS_NUMBER']
 
     for col in df.columns:
         if df[col].dtype == 'object':
+            # Skip state columns and numeric columns
             if col in state_columns:
                 df[col] = df[col].str.upper()
-            else:
+            elif col not in numeric_columns:
                 df[col] = df[col].str.title()
 
     return df
