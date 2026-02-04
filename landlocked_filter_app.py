@@ -246,13 +246,13 @@ if config_complete:
                 # Step 3: Filter by proximity (1 mile = 5280 feet)
                 st.write("**Step 3:** Filtering owners with nearby properties (within 1 mile)...")
 
-                records_to_keep = []
+                indices_to_keep = []
                 excluded_count = 0
 
                 progress_bar = st.progress(0)
                 total = len(matched_df)
 
-                for idx, (_, row) in enumerate(matched_df.iterrows()):
+                for idx, (row_idx, row) in enumerate(matched_df.iterrows()):
                     try:
                         lat = float(row['LATITUDE'])
                         lon = float(row['LONGITUDE'])
@@ -263,16 +263,16 @@ if config_complete:
                         )
 
                         if not has_nearby:
-                            records_to_keep.append(row)
+                            indices_to_keep.append(row_idx)
                         else:
                             excluded_count += 1
                     except (ValueError, TypeError):
                         # If we can't parse coordinates, keep the record
-                        records_to_keep.append(row)
+                        indices_to_keep.append(row_idx)
 
                     progress_bar.progress((idx + 1) / total)
 
-                filtered_matched_df = pd.DataFrame(records_to_keep)
+                filtered_matched_df = matched_df.loc[indices_to_keep].copy()
 
                 st.success(f"✅ Excluded {excluded_count:,} records (owner has property within 1 mile)")
                 st.success(f"✅ Remaining matched records: {len(filtered_matched_df):,}")
