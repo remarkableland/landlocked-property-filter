@@ -184,7 +184,7 @@ with col1:
         "Number of Mail_CallRail codes",
         min_value=1,
         max_value=10,
-        value=2,
+        value=1,
         step=1
     )
 
@@ -197,11 +197,13 @@ with col3:
 # Dynamic code inputs
 st.markdown("**Enter Mail_CallRail codes:**")
 codes = []
+default_codes = ["817-674-1490_Landlocked10_Postcard"]
 code_cols = st.columns(min(num_codes, 4))
 for i in range(num_codes):
     col_idx = i % 4
     with code_cols[col_idx]:
-        code = st.text_input(f"Code {i+1}", key=f"code_{i}", placeholder=f"Code {i+1}")
+        default_value = default_codes[i] if i < len(default_codes) else ""
+        code = st.text_input(f"Code {i+1}", key=f"code_{i}", value=default_value)
         codes.append(code)
 
 # Validation
