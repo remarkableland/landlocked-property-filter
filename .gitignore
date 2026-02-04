@@ -1,0 +1,5 @@
+.DS_Store
+sample data/
+*.csv
+__pycache__/
+.streamlit/
