@@ -5,10 +5,12 @@ from datetime import datetime
 
 st.set_page_config(page_title="Landlocked Property Filter", page_icon="🏞️", layout="wide")
 
-# Version 1.1 - Fixed SECTION column preservation in proximity filtering
+# Version 1.2 - Fixed SECTION column preservation in proximity filtering
+# Deploy timestamp: 2026-02-04 - FORCE REDEPLOY
 
 st.title("🏞️ Landlocked Property Filter")
 st.markdown("Filter landlocked properties and prepare for mailing list output")
+st.caption("Version 1.2 - SECTION fix deployed")
 
 # Define columns to delete (from close-input-file spec)
 COLUMNS_TO_DELETE = [
@@ -104,6 +106,7 @@ def map_landlocked_to_property_schema(landlocked_df, property_columns):
         new_row = {}
 
         # Map columns that have equivalents
+        # LANDLOCKED_TO_PROPERTY_SEARCH maps: Property Search column -> Landlocked column name
         for ps_col, ll_col in LANDLOCKED_TO_PROPERTY_SEARCH.items():
             if ll_col in row.index:
                 new_row[ps_col] = row[ll_col]
