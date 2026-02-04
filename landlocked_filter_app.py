@@ -189,10 +189,10 @@ with col1:
     )
 
 with col2:
-    lead_type = st.text_input("Lead_Type", placeholder="e.g., Basic")
+    lead_type = st.text_input("Lead_Type", value="Landlocked")
 
 with col3:
-    mail_type = st.text_input("Mail_Type", placeholder="e.g., Neutral Postcard")
+    mail_type = st.text_input("Mail_Type", value="Neutral Postcard")
 
 # Dynamic code inputs
 st.markdown("**Enter Mail_CallRail codes:**")
