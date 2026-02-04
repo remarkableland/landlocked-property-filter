@@ -5,6 +5,8 @@ from datetime import datetime
 
 st.set_page_config(page_title="Landlocked Property Filter", page_icon="🏞️", layout="wide")
 
+# Version 1.1 - Fixed SECTION column preservation in proximity filtering
+
 st.title("🏞️ Landlocked Property Filter")
 st.markdown("Filter landlocked properties and prepare for mailing list output")
 
