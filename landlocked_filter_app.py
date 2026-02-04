@@ -5,11 +5,11 @@ from datetime import datetime
 
 st.set_page_config(page_title="Landlocked Property Filter", page_icon="🏞️", layout="wide")
 
-# Version 1.3 - Fixed SECTION column being wiped by title case function
+# Version 1.4 - Added fallback APN matching using Parcel Alt APN
 
 st.title("🏞️ Landlocked Property Filter")
 st.markdown("Filter landlocked properties and prepare for mailing list output")
-st.caption("Version 1.3")
+st.caption("Version 1.4")
 
 # Define columns to delete (from close-input-file spec)
 COLUMNS_TO_DELETE = [
@@ -244,12 +244,29 @@ if config_complete:
 
                 # Step 2: Match APNs
                 st.write("**Step 2:** Matching APNs...")
-                landlocked_apns = set(landlocked_df['APN'].str.strip())
+                landlocked_apns = set(landlocked_df['APN'].astype(str).str.strip())
 
-                matched_df = property_df[property_df['APN'].str.strip().isin(landlocked_apns)].copy()
-                matched_apns = set(matched_df['APN'].str.strip())
+                matched_df = property_df[property_df['APN'].astype(str).str.strip().isin(landlocked_apns)].copy()
+                matched_apns = set(matched_df['APN'].astype(str).str.strip())
 
-                unmatched_landlocked_df = landlocked_df[~landlocked_df['APN'].str.strip().isin(matched_apns)].copy()
+                # If few/no matches on APN, try matching landlocked "Parcel Alt APN" to Property Search "APN"
+                if len(matched_df) < len(landlocked_df) * 0.1 and 'Parcel Alt APN' in landlocked_df.columns:
+                    st.info("ℹ️ Few APN matches found, trying Parcel Alt APN...")
+                    landlocked_alt_apns = set(landlocked_df['Parcel Alt APN'].dropna().astype(str).str.strip())
+                    alt_matched_df = property_df[property_df['APN'].astype(str).str.strip().isin(landlocked_alt_apns)].copy()
+
+                    if len(alt_matched_df) > len(matched_df):
+                        st.success(f"✅ Parcel Alt APN matching found {len(alt_matched_df):,} records (vs {len(matched_df):,} from APN)")
+                        matched_df = alt_matched_df
+                        # Build matched set using Parcel Alt APN for unmatched tracking
+                        alt_matched_apns = set(matched_df['APN'].astype(str).str.strip())
+                        unmatched_landlocked_df = landlocked_df[
+                            ~landlocked_df['Parcel Alt APN'].astype(str).str.strip().isin(alt_matched_apns)
+                        ].copy()
+                    else:
+                        unmatched_landlocked_df = landlocked_df[~landlocked_df['APN'].astype(str).str.strip().isin(matched_apns)].copy()
+                else:
+                    unmatched_landlocked_df = landlocked_df[~landlocked_df['APN'].astype(str).str.strip().isin(matched_apns)].copy()
 
                 st.success(f"✅ Matched: {len(matched_df):,} records")
                 st.info(f"ℹ️ Unmatched landlocked records: {len(unmatched_landlocked_df):,}")
