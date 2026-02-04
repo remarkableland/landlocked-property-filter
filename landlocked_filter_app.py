@@ -352,6 +352,19 @@ if config_complete:
                 st.session_state['processed_df'] = combined_df
                 st.session_state['processing_complete'] = True
 
+                # Extract state and county for filename
+                if 'COUNTY' in property_df.columns:
+                    county_val = property_df['COUNTY'].dropna().iloc[0] if len(property_df['COUNTY'].dropna()) > 0 else "Unknown"
+                    st.session_state['county'] = str(county_val).strip().replace(' ', '_')
+                else:
+                    st.session_state['county'] = "Unknown"
+
+                if 'SITE_STATE' in property_df.columns:
+                    state_val = property_df['SITE_STATE'].dropna().iloc[0] if len(property_df['SITE_STATE'].dropna()) > 0 else "Unknown"
+                    st.session_state['state'] = str(state_val).strip().upper()
+                else:
+                    st.session_state['state'] = "Unknown"
+
                 # Summary
                 st.subheader("📊 Processing Summary")
                 st.write(f"• **Original landlocked records:** {len(landlocked_df):,}")
@@ -377,7 +390,9 @@ if st.session_state.get('processing_complete', False):
 
     # File naming
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-    default_name = f"landlocked_filtered_{current_time}.csv"
+    state = st.session_state.get('state', 'Unknown')
+    county = st.session_state.get('county', 'Unknown')
+    default_name = f"landlocked_{state}_{county}_{current_time}.csv"
     filename = st.text_input("Output filename:", value=default_name)
     if not filename.endswith('.csv'):
         filename += '.csv'
